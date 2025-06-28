@@ -1,6 +1,6 @@
 // API Configuration
 export const API_BASE_URL = 'https://api.rawg.io/api';
-export const API_KEY = 'your-rawg-api-key'; // Will be replaced with environment variable
+export const API_KEY = import.meta.env.VITE_RAWG_API_KEY || 'your-rawg-api-key';
 
 // Pagination
 export const DEFAULT_PAGE_SIZE = 20;
