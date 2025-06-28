@@ -1,3 +1,7 @@
 {
-	"/": []
+	"/": [],
+	"/games": [],
+	"/games/[slug]": [],
+	"/profile": [],
+	"/wishlist": []
 }
