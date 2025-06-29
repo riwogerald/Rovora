@@ -1,0 +1,145 @@
+@import '@skeletonlabs/skeleton/themes/theme-skeleton.css';
+@import '@skeletonlabs/skeleton/styles/skeleton.css';
+@import '@tailwindcss/base';
+@import '@tailwindcss/components';
+@import '@tailwindcss/utilities';
+@import 'uno.css';
+
+/* Custom Rovora Styles */
+:root {
+  --font-gaming: 'Orbitron Variable', 'Orbitron', monospace;
+}
+
+/* Gaming-specific animations */
+@keyframes controllerPress {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Controller rating system styles */
+.controller-rating {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.controller-btn {
+  @apply inline-flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all duration-200 cursor-pointer;
+}
+
+.controller-btn:hover {
+  @apply scale-110;
+}
+
+.controller-btn.active {
+  @apply bg-primary-500 border-primary-500 text-white shadow-lg;
+  animation: controllerPress 0.1s ease-in-out;
+}
+
+.controller-btn.inactive {
+  @apply bg-surface-100-800-token border-surface-300-600-token;
+}
+
+/* Game card hover effects */
+.game-card {
+  transition: all 0.3s ease;
+}
+
+.game-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.game-card:hover .game-image {
+  transform: scale(1.05);
+}
+
+/* Platform badges */
+.platform-badge {
+  @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.platform-steam { @apply bg-gray-800 text-white; }
+.platform-xbox { @apply bg-green-600 text-white; }
+.platform-playstation { @apply bg-blue-600 text-white; }
+.platform-nintendo { @apply bg-red-600 text-white; }
+.platform-epic { @apply bg-gray-900 text-white; }
+.platform-gog { @apply bg-purple-600 text-white; }
+
+/* Status indicators */
+.status-indicator {
+  @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.status-playing { @apply bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300; }
+.status-completed { @apply bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300; }
+.status-dropped { @apply bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300; }
+.status-backlog { @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300; }
+.status-wishlist { @apply bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300; }
+
+/* Codex entry styles */
+.codex-entry {
+  @apply border-l-4 border-l-tertiary-500 bg-surface-50-900-token;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-surface-100-800-token;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-surface-300-600-token rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-surface-400-500-token;
+}
+
+/* Focus styles */
+:focus-visible {
+  @apply outline-2 outline-offset-2 outline-primary-500;
+}
+
+/* Typography enhancements */
+.text-gaming {
+  font-family: var(--font-gaming);
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+/* Loading states */
+.skeleton {
+  @apply bg-surface-200-700-token animate-pulse rounded;
+}
+
+/* Responsive utilities */
+@media (max-width: 640px) {
+  .controller-rating {
+    gap: 0.25rem;
+  }
+  
+  .controller-btn {
+    @apply w-6 h-6;
+  }
+}

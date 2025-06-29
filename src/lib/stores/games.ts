@@ -1,28 +1,27 @@
 import { writable, derived } from 'svelte/store';
-import type { Game, GameFilters, GameSearchResult } from '$lib/types/game';
+import type { Game, GameEntry, SearchFilters, PaginatedResponse } from '$lib/types/core';
 
 interface GamesState {
   games: Game[];
-  featured: Game[];
-  trending: Game[];
+  userGames: GameEntry[];
+  currentGame: Game | null;
+  searchResults: PaginatedResponse<Game> | null;
+  filters: SearchFilters;
   isLoading: boolean;
   error: string | null;
-  filters: GameFilters;
-  searchResult: GameSearchResult | null;
 }
 
 const initialState: GamesState = {
   games: [],
-  featured: [],
-  trending: [],
-  isLoading: false,
-  error: null,
+  userGames: [],
+  currentGame: null,
+  searchResults: null,
   filters: {
-    page: 1,
-    page_size: 20,
-    ordering: '-rating'
+    sort_by: 'title',
+    sort_order: 'asc'
   },
-  searchResult: null
+  isLoading: false,
+  error: null
 };
 
 function createGamesStore() {
@@ -30,37 +29,67 @@ function createGamesStore() {
 
   return {
     subscribe,
+    
     setGames: (games: Game[]) => {
       update(state => ({ ...state, games }));
     },
-    setFeatured: (featured: Game[]) => {
-      update(state => ({ ...state, featured }));
+    
+    setUserGames: (userGames: GameEntry[]) => {
+      update(state => ({ ...state, userGames }));
     },
-    setTrending: (trending: Game[]) => {
-      update(state => ({ ...state, trending }));
+    
+    setCurrentGame: (game: Game | null) => {
+      update(state => ({ ...state, currentGame: game }));
     },
-    setLoading: (isLoading: boolean) => {
-      update(state => ({ ...state, isLoading }));
+    
+    setSearchResults: (results: PaginatedResponse<Game> | null) => {
+      update(state => ({ ...state, searchResults: results }));
     },
-    setError: (error: string | null) => {
-      update(state => ({ ...state, error }));
-    },
-    setFilters: (filters: Partial<GameFilters>) => {
+    
+    setFilters: (filters: Partial<SearchFilters>) => {
       update(state => ({
         ...state,
         filters: { ...state.filters, ...filters }
       }));
     },
-    setSearchResult: (searchResult: GameSearchResult | null) => {
-      update(state => ({ ...state, searchResult }));
+    
+    setLoading: (isLoading: boolean) => {
+      update(state => ({ ...state, isLoading }));
     },
+    
+    setError: (error: string | null) => {
+      update(state => ({ ...state, error }));
+    },
+    
+    addUserGame: (gameEntry: GameEntry) => {
+      update(state => ({
+        ...state,
+        userGames: [...state.userGames, gameEntry]
+      }));
+    },
+    
+    updateUserGame: (gameId: string, updates: Partial<GameEntry>) => {
+      update(state => ({
+        ...state,
+        userGames: state.userGames.map(game =>
+          game.id === gameId ? { ...game, ...updates } : game
+        )
+      }));
+    },
+    
+    removeUserGame: (gameId: string) => {
+      update(state => ({
+        ...state,
+        userGames: state.userGames.filter(game => game.id !== gameId)
+      }));
+    },
+    
     clearFilters: () => {
       update(state => ({
         ...state,
         filters: {
-          page: 1,
-          page_size: 20,
-          ordering: '-rating'
+          sort_by: 'title',
+          sort_order: 'asc'
         }
       }));
     }
@@ -70,6 +99,41 @@ function createGamesStore() {
 export const games = createGamesStore();
 
 // Derived stores
-export const filteredGames = derived(games, $games => $games.searchResult?.results || $games.games);
-export const hasMoreGames = derived(games, $games => !!$games.searchResult?.next);
-export const totalGames = derived(games, $games => $games.searchResult?.count || 0);
+export const userGamesByStatus = derived(games, $games => {
+  const gamesByStatus = {
+    playing: [],
+    completed: [],
+    dropped: [],
+    backlog: [],
+    wishlist: [],
+    on_hold: []
+  } as Record<string, GameEntry[]>;
+
+  $games.userGames.forEach(game => {
+    if (gamesByStatus[game.status]) {
+      gamesByStatus[game.status].push(game);
+    }
+  });
+
+  return gamesByStatus;
+});
+
+export const userStats = derived(games, $games => {
+  const stats = {
+    total_games: $games.userGames.length,
+    playing: $games.userGames.filter(g => g.status === 'playing').length,
+    completed: $games.userGames.filter(g => g.status === 'completed').length,
+    dropped: $games.userGames.filter(g => g.status === 'dropped').length,
+    backlog: $games.userGames.filter(g => g.status === 'backlog').length,
+    wishlist: $games.userGames.filter(g => g.status === 'wishlist').length,
+    total_playtime: $games.userGames.reduce((total, game) => total + (game.playtime_hours || 0), 0),
+    average_rating: 0
+  };
+
+  const ratedGames = $games.userGames.filter(g => g.rating?.value);
+  if (ratedGames.length > 0) {
+    stats.average_rating = ratedGames.reduce((sum, game) => sum + (game.rating?.value || 0), 0) / ratedGames.length;
+  }
+
+  return stats;
+});
