@@ -44,6 +44,7 @@ declare module '$env/static/private' {
 	export const EDITOR: string;
 	export const npm_config_user_agent: string;
 	export const INIT_CWD: string;
+	export const npm_config_legacy_peer_deps: string;
 	export const npm_config_update_notifier: string;
 	export const npm_config_ignore_dep_scripts: string;
 	export const npm_config_prefer_symlinked_executables: string;
@@ -65,11 +66,12 @@ declare module '$env/static/private' {
 	export const npm_command: string;
 	export const npm_package_name: string;
 	export const npm_package_version: string;
+	export const npm_package_engines_node: string;
+	export const npm_package_engines_bun: string;
 	export const npm_package_json: string;
 	export const npm_lifecycle_event: string;
 	export const npm_lifecycle_script: string;
 	export const npm_config_node_gyp: string;
-	export const NODE_ENV: string;
 }
 
 /**
@@ -119,6 +121,7 @@ declare module '$env/dynamic/private' {
 		EDITOR: string;
 		npm_config_user_agent: string;
 		INIT_CWD: string;
+		npm_config_legacy_peer_deps: string;
 		npm_config_update_notifier: string;
 		npm_config_ignore_dep_scripts: string;
 		npm_config_prefer_symlinked_executables: string;
@@ -140,11 +143,12 @@ declare module '$env/dynamic/private' {
 		npm_command: string;
 		npm_package_name: string;
 		npm_package_version: string;
+		npm_package_engines_node: string;
+		npm_package_engines_bun: string;
 		npm_package_json: string;
 		npm_lifecycle_event: string;
 		npm_lifecycle_script: string;
 		npm_config_node_gyp: string;
-		NODE_ENV: string;
 		[key: `PUBLIC_${string}`]: undefined;
 		[key: `${string}`]: string | undefined;
 	}
