@@ -4,8 +4,14 @@ import { eq } from 'drizzle-orm';
 import { lucia } from '$lib/auth/lucia';
 import { db } from '$lib/database/connection';
 import { users, userPreferences, userStats } from '$lib/database/schema/auth';
-import { hashPassword, sanitizeRedirectUrl } from '$lib/auth/utils';
+import { 
+  hashPassword, 
+  sanitizeRedirectUrl, 
+  generateEmailVerificationToken, 
+  createEmailVerificationExpiry 
+} from '$lib/auth/utils';
 import { registerSchema } from '$lib/auth/validation';
+import { sendVerificationEmail } from '$lib/email/mailer';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load = async ({ locals, url }: Parameters<PageServerLoad>[0]) => {
@@ -64,6 +70,10 @@ export const actions = {
       // Hash password
       const passwordHash = await hashPassword(password);
 
+      // Generate email verification token
+      const verificationToken = generateEmailVerificationToken();
+      const verificationExpiry = createEmailVerificationExpiry();
+
       // Create user in transaction
       const newUser = await db.transaction(async (tx) => {
         // Create user
@@ -74,7 +84,9 @@ export const actions = {
             email,
             password_hash: passwordHash,
             display_name: username,
-            email_verified: false
+            email_verified: false,
+            email_verification_token: verificationToken,
+            email_verification_expires: verificationExpiry.toISOString()
           })
           .returning();
 
@@ -91,7 +103,15 @@ export const actions = {
         return user;
       });
 
-      // Create session
+      // Send verification email
+      const emailSent = await sendVerificationEmail(email, username, verificationToken);
+      
+      if (!emailSent) {
+        console.error('Failed to send verification email');
+        // Don't fail registration if email fails, just log it
+      }
+
+      // Create session (user can use the app but with limited features until verified)
       const session = await lucia.createSession(newUser.id, {});
       const sessionCookie = lucia.createSessionCookie(session.id);
       
@@ -100,9 +120,8 @@ export const actions = {
         ...sessionCookie.attributes
       });
 
-      // Redirect to intended page or dashboard
-      const redirectTo = sanitizeRedirectUrl(url.searchParams.get('redirect'), '/dashboard');
-      throw redirect(302, redirectTo);
+      // Redirect to verification notice page
+      throw redirect(302, '/verify-email-notice');
 
     } catch (error) {
       console.error('Registration error:', error);
