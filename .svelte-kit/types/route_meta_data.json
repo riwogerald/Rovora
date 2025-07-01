@@ -19,6 +19,14 @@
 		"src/routes/(auth)/logout/+page.server.ts",
 		"src/routes/+layout.server.ts"
 	],
+	"/(app)/profile": [
+		"src/routes/(app)/profile/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/(app)/profile/[username]": [
+		"src/routes/(app)/profile/[username]/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
 	"/(auth)/register": [
 		"src/routes/(auth)/register/+page.server.ts",
 		"src/routes/+layout.server.ts"

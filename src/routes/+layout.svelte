@@ -16,6 +16,16 @@
   $: user = data.user;
   $: isAuthPage = $page.route.id?.startsWith('/(auth)');
   $: isAppPage = $page.route.id?.startsWith('/(app)');
+  
+  let showUserMenu = false;
+  
+  function toggleUserMenu() {
+    showUserMenu = !showUserMenu;
+  }
+  
+  function closeUserMenu() {
+    showUserMenu = false;
+  }
 </script>
 
 <!-- Skeleton Modal -->
@@ -30,13 +40,18 @@
 <!-- Mode Watcher for theme switching -->
 <ModeWatcher />
 
+<!-- Click outside to close user menu -->
+{#if showUserMenu}
+  <div class="fixed inset-0 z-10" on:click={closeUserMenu} role="button" tabindex="-1"></div>
+{/if}
+
 <div class="app h-full overflow-hidden flex flex-col" data-theme="rovora">
   <!-- Email Verification Banner -->
   <EmailVerificationBanner {user} showBanner={!isAuthPage} />
   
   {#if !isAuthPage}
     <!-- Header -->
-    <header class="border-b border-surface-200-700-token bg-surface-50-900-token">
+    <header class="border-b border-surface-200-700-token bg-surface-50-900-token sticky top-0 z-20">
       <div class="container mx-auto px-4 py-3">
         <div class="flex items-center justify-between">
           <a href="/" class="flex items-center gap-2">
@@ -78,7 +93,10 @@
               
               <!-- User Menu -->
               <div class="relative">
-                <button class="flex items-center gap-2 p-2 rounded-lg hover:bg-surface-100-800-token transition-colors">
+                <button 
+                  on:click={toggleUserMenu}
+                  class="flex items-center gap-2 p-2 rounded-lg hover:bg-surface-100-800-token transition-colors"
+                >
                   {#if user.avatar_url}
                     <img src={user.avatar_url} alt={user.username} class="w-6 h-6 rounded-full" />
                   {:else}
@@ -94,17 +112,65 @@
                   {#if !user.email_verified}
                     <Icon icon="lucide:alert-circle" class="w-4 h-4 text-warning-500" title="Email not verified" />
                   {/if}
+                  <Icon icon="lucide:chevron-down" class="w-4 h-4 text-surface-500-400-token" />
                 </button>
                 
-                <!-- Dropdown menu would go here -->
+                <!-- Dropdown Menu -->
+                {#if showUserMenu}
+                  <div class="absolute right-0 top-full mt-2 w-64 card variant-filled-surface p-2 shadow-lg z-30">
+                    <!-- User Info -->
+                    <div class="px-3 py-2 border-b border-surface-200-700-token mb-2">
+                      <p class="font-medium text-surface-900-50-token">
+                        {user.display_name || user.username}
+                      </p>
+                      <p class="text-sm text-surface-500-400-token">@{user.username}</p>
+                      {#if !user.email_verified}
+                        <div class="flex items-center gap-1 mt-1">
+                          <Icon icon="lucide:alert-circle" class="w-3 h-3 text-warning-500" />
+                          <span class="text-xs text-warning-500">Email not verified</span>
+                        </div>
+                      {/if}
+                    </div>
+                    
+                    <!-- Menu Items -->
+                    <div class="space-y-1">
+                      <a href="/profile/{user.username}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-100-800-token transition-colors">
+                        <Icon icon="lucide:user" class="w-4 h-4" />
+                        <span>View Profile</span>
+                      </a>
+                      
+                      <a href="/profile" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-100-800-token transition-colors">
+                        <Icon icon="lucide:settings" class="w-4 h-4" />
+                        <span>Settings</span>
+                      </a>
+                      
+                      <a href="/library" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-100-800-token transition-colors">
+                        <Icon icon="lucide:library" class="w-4 h-4" />
+                        <span>My Library</span>
+                      </a>
+                      
+                      <a href="/codex" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-100-800-token transition-colors">
+                        <Icon icon="lucide:book-open" class="w-4 h-4" />
+                        <span>My Codex</span>
+                      </a>
+                      
+                      <div class="border-t border-surface-200-700-token my-2"></div>
+                      
+                      <a href="/help" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-100-800-token transition-colors">
+                        <Icon icon="lucide:help-circle" class="w-4 h-4" />
+                        <span>Help & Support</span>
+                      </a>
+                      
+                      <form method="POST" action="/logout" class="w-full">
+                        <button type="submit" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-100-800-token transition-colors text-left">
+                          <Icon icon="lucide:log-out" class="w-4 h-4" />
+                          <span>Sign Out</span>
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                {/if}
               </div>
-              
-              <form method="POST" action="/logout">
-                <button type="submit" class="btn variant-ghost-surface btn-sm">
-                  <Icon icon="lucide:log-out" class="w-4 h-4 mr-1" />
-                  Sign Out
-                </button>
-              </form>
             {:else}
               <a href="/login" class="btn variant-ghost-surface">Sign In</a>
               <a href="/register" class="btn variant-filled-primary">Sign Up</a>

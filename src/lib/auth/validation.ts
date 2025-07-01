@@ -93,8 +93,43 @@ export const updateProfileSchema = z.object({
     .optional()
 });
 
+export const updatePreferencesSchema = z.object({
+  theme: z.enum(['light', 'dark', 'system']).optional(),
+  language: z.string().optional(),
+  timezone: z.string().optional(),
+  privacy_level: z.enum(['public', 'friends', 'private']).optional(),
+  show_playtime: z.boolean().optional(),
+  show_achievements: z.boolean().optional(),
+  show_activity: z.boolean().optional(),
+  show_wishlist: z.boolean().optional(),
+  show_reviews: z.boolean().optional(),
+  default_platform_id: z.string().optional(),
+  auto_import_steam: z.boolean().optional(),
+  preferred_rating_system: z.enum(['controller', 'stars', 'numeric']).optional(),
+  email_notifications: z.boolean().optional(),
+  push_notifications: z.boolean().optional(),
+  friend_requests: z.boolean().optional(),
+  game_updates: z.boolean().optional(),
+  social_activity: z.boolean().optional()
+});
+
+export const changePasswordSchema = z.object({
+  current_password: z.string().min(1, 'Current password is required'),
+  new_password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/[a-zA-Z]/, 'Password must contain at least one letter')
+    .regex(/[0-9]/, 'Password must contain at least one number'),
+  confirm_password: z.string()
+}).refine((data) => data.new_password === data.confirm_password, {
+  message: "Passwords don't match",
+  path: ["confirm_password"],
+});
+
 export type RegisterData = z.infer<typeof registerSchema>;
 export type LoginData = z.infer<typeof loginSchema>;
 export type ForgotPasswordData = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordData = z.infer<typeof resetPasswordSchema>;
 export type UpdateProfileData = z.infer<typeof updateProfileSchema>;
+export type UpdatePreferencesData = z.infer<typeof updatePreferencesSchema>;
+export type ChangePasswordData = z.infer<typeof changePasswordSchema>;
