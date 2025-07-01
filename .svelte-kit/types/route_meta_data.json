@@ -1,3 +1,22 @@
 {
-	"/": []
+	"/": [
+		"src/routes/+layout.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/(app)/dashboard": [
+		"src/routes/(app)/dashboard/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/(auth)/login": [
+		"src/routes/(auth)/login/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/(auth)/logout": [
+		"src/routes/(auth)/logout/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/(auth)/register": [
+		"src/routes/(auth)/register/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	]
 }
