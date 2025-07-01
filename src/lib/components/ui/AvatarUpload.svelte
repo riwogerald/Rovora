@@ -121,6 +121,7 @@
   {/if}
   
   <!-- Remove Button (only show if there's an avatar) -->
+  )
   {#if editable && currentAvatar}
     <button 
       type="button"
