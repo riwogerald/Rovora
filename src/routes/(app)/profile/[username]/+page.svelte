@@ -2,6 +2,7 @@
   import { page } from '$app/stores';
   import Icon from '@iconify/svelte';
   import ControllerRating from '$lib/components/ui/ControllerRating.svelte';
+  import PrivacyIndicator from '$lib/components/ui/PrivacyIndicator.svelte';
   
   export let data;
   
@@ -10,6 +11,10 @@
   $: recentGames = data.recentGames;
   $: isOwnProfile = data.isOwnProfile;
   $: isFollowing = data.isFollowing;
+  $: canViewLibrary = data.canViewLibrary;
+  $: canViewActivity = data.canViewActivity;
+  $: canViewCodex = data.canViewCodex;
+  $: canSendFriendRequest = data.canSendFriendRequest;
   
   function formatJoinDate(dateString: string): string {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -81,10 +86,12 @@
             
             <div class="flex items-center gap-3">
               {#if !isOwnProfile}
-                <button class="btn variant-filled-primary">
-                  <Icon icon={isFollowing ? 'lucide:user-check' : 'lucide:user-plus'} class="w-4 h-4 mr-2" />
-                  {isFollowing ? 'Following' : 'Follow'}
-                </button>
+                {#if canSendFriendRequest}
+                  <button class="btn variant-filled-primary">
+                    <Icon icon={isFollowing ? 'lucide:user-check' : 'lucide:user-plus'} class="w-4 h-4 mr-2" />
+                    {isFollowing ? 'Following' : 'Follow'}
+                  </button>
+                {/if}
                 <button class="btn variant-ghost-surface">
                   <Icon icon="lucide:message-circle" class="w-4 h-4 mr-2" />
                   Message
@@ -169,143 +176,180 @@
       <!-- Stats Sidebar -->
       <div class="lg:col-span-1 space-y-6">
         <!-- Gaming Stats -->
-        <div class="card variant-ghost-surface p-6">
-          <h2 class="text-xl font-semibold text-surface-900-50-token mb-4">
-            Gaming Stats
-          </h2>
-          
-          <div class="space-y-4">
-            <div class="flex items-center justify-between">
-              <span class="text-surface-600-300-token">Games Tracked</span>
-              <span class="font-semibold text-surface-900-50-token">{stats?.total_games || 0}</span>
-            </div>
+        {#if stats}
+          <div class="card variant-ghost-surface p-6">
+            <h2 class="text-xl font-semibold text-surface-900-50-token mb-4">
+              Gaming Stats
+            </h2>
             
-            <div class="flex items-center justify-between">
-              <span class="text-surface-600-300-token">Completed</span>
-              <span class="font-semibold text-success-500">{stats?.games_completed || 0}</span>
-            </div>
-            
-            <div class="flex items-center justify-between">
-              <span class="text-surface-600-300-token">Currently Playing</span>
-              <span class="font-semibold text-primary-500">{stats?.games_playing || 0}</span>
-            </div>
-            
-            <div class="flex items-center justify-between">
-              <span class="text-surface-600-300-token">Total Playtime</span>
-              <span class="font-semibold text-surface-900-50-token">
-                {formatPlaytime(stats?.total_playtime || 0)}
-              </span>
-            </div>
-            
-            {#if stats?.average_rating > 0}
+            <div class="space-y-4">
               <div class="flex items-center justify-between">
-                <span class="text-surface-600-300-token">Avg Rating</span>
-                <div class="flex items-center gap-2">
-                  <ControllerRating value={Math.round(stats.average_rating)} readonly size="sm" showValue={false} />
-                  <span class="text-sm font-medium">{stats.average_rating.toFixed(1)}</span>
-                </div>
+                <span class="text-surface-600-300-token">Games Tracked</span>
+                <span class="font-semibold text-surface-900-50-token">{stats.total_games || 0}</span>
               </div>
-            {/if}
+              
+              <div class="flex items-center justify-between">
+                <span class="text-surface-600-300-token">Completed</span>
+                <span class="font-semibold text-success-500">{stats.games_completed || 0}</span>
+              </div>
+              
+              <div class="flex items-center justify-between">
+                <span class="text-surface-600-300-token">Currently Playing</span>
+                <span class="font-semibold text-primary-500">{stats.games_playing || 0}</span>
+              </div>
+              
+              <div class="flex items-center justify-between">
+                <span class="text-surface-600-300-token">Total Playtime</span>
+                <span class="font-semibold text-surface-900-50-token">
+                  {formatPlaytime(stats.total_playtime || 0)}
+                </span>
+              </div>
+              
+              {#if stats.average_rating > 0}
+                <div class="flex items-center justify-between">
+                  <span class="text-surface-600-300-token">Avg Rating</span>
+                  <div class="flex items-center gap-2">
+                    <ControllerRating value={Math.round(stats.average_rating)} readonly size="sm" showValue={false} />
+                    <span class="text-sm font-medium">{stats.average_rating.toFixed(1)}</span>
+                  </div>
+                </div>
+              {/if}
+            </div>
           </div>
-        </div>
+        {:else}
+          <div class="card variant-ghost-surface p-6">
+            <div class="text-center py-8">
+              <Icon icon="lucide:lock" class="w-12 h-12 text-surface-400-500-token mx-auto mb-4" />
+              <p class="text-surface-500-400-token">
+                Gaming stats are private
+              </p>
+            </div>
+          </div>
+        {/if}
 
         <!-- Social Stats -->
-        <div class="card variant-ghost-surface p-6">
-          <h2 class="text-xl font-semibold text-surface-900-50-token mb-4">
-            Social
-          </h2>
-          
-          <div class="space-y-4">
-            <div class="flex items-center justify-between">
-              <span class="text-surface-600-300-token">Followers</span>
-              <span class="font-semibold text-surface-900-50-token">{stats?.followers_count || 0}</span>
-            </div>
+        {#if stats}
+          <div class="card variant-ghost-surface p-6">
+            <h2 class="text-xl font-semibold text-surface-900-50-token mb-4">
+              Social
+            </h2>
             
-            <div class="flex items-center justify-between">
-              <span class="text-surface-600-300-token">Following</span>
-              <span class="font-semibold text-surface-900-50-token">{stats?.following_count || 0}</span>
-            </div>
-            
-            <div class="flex items-center justify-between">
-              <span class="text-surface-600-300-token">Codex Entries</span>
-              <span class="font-semibold text-secondary-500">{stats?.codex_entries || 0}</span>
-            </div>
-            
-            <div class="flex items-center justify-between">
-              <span class="text-surface-600-300-token">Reviews</span>
-              <span class="font-semibold text-tertiary-500">{stats?.reviews_written || 0}</span>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <span class="text-surface-600-300-token">Followers</span>
+                <span class="font-semibold text-surface-900-50-token">{stats.followers_count || 0}</span>
+              </div>
+              
+              <div class="flex items-center justify-between">
+                <span class="text-surface-600-300-token">Following</span>
+                <span class="font-semibold text-surface-900-50-token">{stats.following_count || 0}</span>
+              </div>
+              
+              {#if canViewCodex}
+                <div class="flex items-center justify-between">
+                  <span class="text-surface-600-300-token">Codex Entries</span>
+                  <span class="font-semibold text-secondary-500">{stats.codex_entries || 0}</span>
+                </div>
+              {/if}
+              
+              <div class="flex items-center justify-between">
+                <span class="text-surface-600-300-token">Reviews</span>
+                <span class="font-semibold text-tertiary-500">{stats.reviews_written || 0}</span>
+              </div>
             </div>
           </div>
-        </div>
+        {/if}
       </div>
 
       <!-- Main Content -->
       <div class="lg:col-span-2 space-y-6">
         <!-- Recent Games -->
-        <div class="card variant-ghost-surface p-6">
-          <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-semibold text-surface-900-50-token">
-              Recent Games
-            </h2>
-            <a href="/profile/{user?.username}/library" class="text-primary-500 hover:text-primary-400 text-sm">
-              View all →
-            </a>
-          </div>
-          
-          {#if recentGames?.length > 0}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {#each recentGames as gameEntry}
-                <div class="flex items-center gap-4 p-4 bg-surface-100-800-token rounded-lg">
-                  {#if gameEntry.game.cover_image}
-                    <img src={gameEntry.game.cover_image} alt={gameEntry.game.title} class="w-12 h-12 rounded object-cover" />
-                  {:else}
-                    <div class="w-12 h-12 bg-surface-200-700-token rounded flex items-center justify-center">
-                      <Icon icon="lucide:gamepad-2" class="w-6 h-6 text-surface-400-500-token" />
-                    </div>
-                  {/if}
-                  
-                  <div class="flex-1 min-w-0">
-                    <h3 class="font-medium text-surface-900-50-token truncate">
-                      {gameEntry.game.title}
-                    </h3>
-                    <div class="flex items-center gap-2 text-sm text-surface-500-400-token">
-                      <Icon icon={getPlatformIcon(gameEntry.platform.slug)} class="w-4 h-4" />
-                      <span class="capitalize">{gameEntry.status}</span>
-                      {#if gameEntry.playtime_hours}
-                        <span>• {gameEntry.playtime_hours}h</span>
-                      {/if}
-                    </div>
-                  </div>
-                  
-                  {#if gameEntry.rating}
-                    <ControllerRating value={gameEntry.rating.value} readonly size="sm" showValue={false} />
-                  {/if}
-                </div>
-              {/each}
+        {#if canViewLibrary}
+          <div class="card variant-ghost-surface p-6">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-xl font-semibold text-surface-900-50-token">
+                Recent Games
+              </h2>
+              <a href="/profile/{user?.username}/library" class="text-primary-500 hover:text-primary-400 text-sm">
+                View all →
+              </a>
             </div>
-          {:else}
+            
+            {#if recentGames?.length > 0}
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {#each recentGames as gameEntry}
+                  <div class="flex items-center gap-4 p-4 bg-surface-100-800-token rounded-lg">
+                    {#if gameEntry.game.cover_image}
+                      <img src={gameEntry.game.cover_image} alt={gameEntry.game.title} class="w-12 h-12 rounded object-cover" />
+                    {:else}
+                      <div class="w-12 h-12 bg-surface-200-700-token rounded flex items-center justify-center">
+                        <Icon icon="lucide:gamepad-2" class="w-6 h-6 text-surface-400-500-token" />
+                      </div>
+                    {/if}
+                    
+                    <div class="flex-1 min-w-0">
+                      <h3 class="font-medium text-surface-900-50-token truncate">
+                        {gameEntry.game.title}
+                      </h3>
+                      <div class="flex items-center gap-2 text-sm text-surface-500-400-token">
+                        <Icon icon={getPlatformIcon(gameEntry.platform.slug)} class="w-4 h-4" />
+                        <span class="capitalize">{gameEntry.status}</span>
+                        {#if gameEntry.playtime_hours}
+                          <span>• {gameEntry.playtime_hours}h</span>
+                        {/if}
+                      </div>
+                    </div>
+                    
+                    {#if gameEntry.rating}
+                      <ControllerRating value={gameEntry.rating.value} readonly size="sm" showValue={false} />
+                    {/if}
+                  </div>
+                {/each}
+              </div>
+            {:else}
+              <div class="text-center py-8">
+                <Icon icon="lucide:gamepad-2" class="w-12 h-12 text-surface-400-500-token mx-auto mb-4" />
+                <p class="text-surface-500-400-token">
+                  {isOwnProfile ? "You haven't" : `${user?.username} hasn't`} tracked any games yet
+                </p>
+              </div>
+            {/if}
+          </div>
+        {:else}
+          <div class="card variant-ghost-surface p-6">
             <div class="text-center py-8">
-              <Icon icon="lucide:gamepad-2" class="w-12 h-12 text-surface-400-500-token mx-auto mb-4" />
+              <Icon icon="lucide:lock" class="w-12 h-12 text-surface-400-500-token mx-auto mb-4" />
               <p class="text-surface-500-400-token">
-                {isOwnProfile ? "You haven't" : `${user?.username} hasn't`} tracked any games yet
+                Game library is private
               </p>
             </div>
-          {/if}
-        </div>
+          </div>
+        {/if}
 
         <!-- Recent Activity -->
-        <div class="card variant-ghost-surface p-6">
-          <h2 class="text-xl font-semibold text-surface-900-50-token mb-6">
-            Recent Activity
-          </h2>
-          
-          <div class="text-center py-8">
-            <Icon icon="lucide:activity" class="w-12 h-12 text-surface-400-500-token mx-auto mb-4" />
-            <p class="text-surface-500-400-token">
-              No recent activity to show
-            </p>
+        {#if canViewActivity}
+          <div class="card variant-ghost-surface p-6">
+            <h2 class="text-xl font-semibold text-surface-900-50-token mb-6">
+              Recent Activity
+            </h2>
+            
+            <div class="text-center py-8">
+              <Icon icon="lucide:activity" class="w-12 h-12 text-surface-400-500-token mx-auto mb-4" />
+              <p class="text-surface-500-400-token">
+                No recent activity to show
+              </p>
+            </div>
           </div>
-        </div>
+        {:else}
+          <div class="card variant-ghost-surface p-6">
+            <div class="text-center py-8">
+              <Icon icon="lucide:lock" class="w-12 h-12 text-surface-400-500-token mx-auto mb-4" />
+              <p class="text-surface-500-400-token">
+                Activity feed is private
+              </p>
+            </div>
+          </div>
+        {/if}
       </div>
     </div>
   </div>

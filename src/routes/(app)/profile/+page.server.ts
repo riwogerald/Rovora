@@ -2,6 +2,8 @@ import { fail, redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { db } from '$lib/database/connection';
 import { users, userPreferences, platforms } from '$lib/database/schema/auth';
+import { privacySettings } from '$lib/database/schema/privacy';
+import { PrivacyQueries } from '$lib/database/queries/privacy';
 import { 
   updateProfileSchema, 
   updatePreferencesSchema, 
@@ -22,6 +24,14 @@ export const load: PageServerLoad = async ({ locals }) => {
     .where(eq(userPreferences.user_id, locals.user.id))
     .limit(1);
 
+  // Get privacy settings
+  let userPrivacySettings = await PrivacyQueries.getUserPrivacySettings(locals.user.id);
+  
+  // Create default privacy settings if they don't exist
+  if (!userPrivacySettings) {
+    userPrivacySettings = await PrivacyQueries.createDefaultPrivacySettings(locals.user.id);
+  }
+
   // Get all platforms for gaming preferences
   const allPlatforms = await db
     .select()
@@ -32,6 +42,7 @@ export const load: PageServerLoad = async ({ locals }) => {
   return {
     user: locals.user,
     preferences: userPrefs,
+    privacySettings: userPrivacySettings,
     platforms: allPlatforms
   };
 };
@@ -144,13 +155,17 @@ export const actions: Actions = {
         show_activity: data.show_activity === 'on',
         show_wishlist: data.show_wishlist === 'on',
         show_reviews: data.show_reviews === 'on',
+        show_library: data.show_library === 'on',
+        show_codex: data.show_codex === 'on',
+        show_stats: data.show_stats === 'on',
+        show_gaming_accounts: data.show_gaming_accounts === 'on',
+        allow_friend_requests: data.allow_friend_requests === 'on',
+        show_online_status: data.show_online_status === 'on',
+        indexable_profile: data.indexable_profile === 'on',
         updated_at: new Date().toISOString()
       };
 
-      await db
-        .update(userPreferences)
-        .set(privacyData)
-        .where(eq(userPreferences.user_id, locals.user.id));
+      await PrivacyQueries.updatePrivacySettings(locals.user.id, privacyData);
 
       return {
         success: true,

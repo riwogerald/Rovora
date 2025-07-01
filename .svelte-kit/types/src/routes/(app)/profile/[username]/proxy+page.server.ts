@@ -3,9 +3,11 @@ import { error } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { db } from '$lib/database/connection';
 import { users, userStats, gameEntries, games, platforms } from '$lib/database/schema/auth';
+import { PrivacyQueries } from '$lib/database/queries/privacy';
+import { canViewProfile, canViewSection, filterUserData } from '$lib/utils/privacy';
 import type { PageServerLoad } from './$types';
 
-export const load = async ({ params, locals }: Parameters<PageServerLoad>[0]) => {
+export const load = async ({ params, locals, request }: Parameters<PageServerLoad>[0]) => {
   const { username } = params;
 
   try {
@@ -20,52 +22,82 @@ export const load = async ({ params, locals }: Parameters<PageServerLoad>[0]) =>
       throw error(404, 'User not found');
     }
 
-    // Check if this is the current user's own profile
-    const isOwnProfile = locals.user?.id === user.id;
+    // Get privacy context
+    const privacyContext = await PrivacyQueries.getPrivacyContext(
+      locals.user?.id || null,
+      user.id
+    );
 
-    // Check privacy settings
-    if (!isOwnProfile && user.is_private) {
+    // Check if profile can be viewed
+    if (!canViewProfile(privacyContext)) {
       throw error(403, 'This profile is private');
     }
 
-    // Get user stats
-    const [stats] = await db
-      .select()
-      .from(userStats)
-      .where(eq(userStats.user_id, user.id))
-      .limit(1);
-
-    // Get recent games (last 5)
-    const recentGames = await db
-      .select({
-        gameEntry: gameEntries,
-        game: games,
-        platform: platforms
-      })
-      .from(gameEntries)
-      .innerJoin(games, eq(gameEntries.game_id, games.id))
-      .innerJoin(platforms, eq(gameEntries.platform_id, platforms.id))
-      .where(eq(gameEntries.user_id, user.id))
-      .orderBy(gameEntries.updated_at)
-      .limit(5);
-
-    // Check if current user is following this user (if not own profile)
-    let isFollowing = false;
-    if (!isOwnProfile && locals.user) {
-      // TODO: Implement follow relationship check
-      // const followResult = await db.select().from(follows)...
+    // Record profile view (if not own profile)
+    if (locals.user?.id !== user.id) {
+      await PrivacyQueries.recordProfileView(
+        user.id,
+        locals.user?.id,
+        {
+          ip_address: request.headers.get('x-forwarded-for') || 
+                     request.headers.get('x-real-ip') || 
+                     'unknown',
+          user_agent: request.headers.get('user-agent') || 'unknown',
+          referrer: request.headers.get('referer') || undefined
+        }
+      );
     }
 
+    // Get user stats (if visible)
+    let stats = null;
+    if (canViewSection(privacyContext, 'show_stats')) {
+      const [userStatsResult] = await db
+        .select()
+        .from(userStats)
+        .where(eq(userStats.user_id, user.id))
+        .limit(1);
+      stats = userStatsResult;
+    }
+
+    // Get recent games (if library is visible)
+    let recentGames: any[] = [];
+    if (canViewSection(privacyContext, 'show_library')) {
+      recentGames = await db
+        .select({
+          gameEntry: gameEntries,
+          game: games,
+          platform: platforms
+        })
+        .from(gameEntries)
+        .innerJoin(games, eq(gameEntries.game_id, games.id))
+        .innerJoin(platforms, eq(gameEntries.platform_id, platforms.id))
+        .where(eq(gameEntries.user_id, user.id))
+        .orderBy(gameEntries.updated_at)
+        .limit(5);
+    }
+
+    // Check if current user is following this user
+    let isFollowing = false;
+    if (!privacyContext.isOwnProfile && locals.user) {
+      isFollowing = await PrivacyQueries.areFriends(locals.user.id, user.id);
+    }
+
+    // Filter user data based on privacy settings
+    const filteredUser = filterUserData(user, privacyContext);
+
     return {
-      user: {
-        ...user,
-        // Hide sensitive data based on privacy settings
-        email: isOwnProfile ? user.email : undefined
-      },
+      user: filteredUser,
       stats,
       recentGames,
-      isOwnProfile,
-      isFollowing
+      isOwnProfile: privacyContext.isOwnProfile,
+      isFollowing,
+      canViewLibrary: canViewSection(privacyContext, 'show_library'),
+      canViewActivity: canViewSection(privacyContext, 'show_activity'),
+      canViewCodex: canViewSection(privacyContext, 'show_codex'),
+      canSendFriendRequest: privacyContext.privacySettings.allow_friend_requests && 
+                           !privacyContext.isOwnProfile && 
+                           !isFollowing && 
+                           locals.user !== null
     };
 
   } catch (err) {

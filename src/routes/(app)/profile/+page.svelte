@@ -4,6 +4,8 @@
   import { updateProfileSchema, type UpdateProfileData } from '$lib/auth/validation';
   import Icon from '@iconify/svelte';
   import { toast } from 'svelte-sonner';
+  import PrivacySettings from '$lib/components/ui/PrivacySettings.svelte';
+  import AvatarUpload from '$lib/components/ui/AvatarUpload.svelte';
   
   export let data;
   
@@ -14,6 +16,7 @@
   $: user = data.user;
   $: preferences = data.preferences;
   $: platforms = data.platforms;
+  $: privacySettings = data.privacySettings;
   
   let formData: UpdateProfileData = {
     display_name: user?.display_name || '',
@@ -59,6 +62,37 @@
       pc: 'lucide:monitor'
     };
     return iconMap[slug] || 'lucide:gamepad-2';
+  }
+  
+  function handleAvatarUpload(event: CustomEvent<{ file: File }>) {
+    // TODO: Implement avatar upload
+    console.log('Avatar upload:', event.detail.file);
+    toast.info('Avatar upload coming soon!');
+  }
+  
+  function handleAvatarRemove() {
+    // TODO: Implement avatar removal
+    console.log('Remove avatar');
+    toast.info('Avatar removal coming soon!');
+  }
+  
+  function handlePrivacySave(event: CustomEvent<{ preferences: any }>) {
+    // Create form data and submit
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '?/updatePrivacy';
+    
+    Object.entries(event.detail.preferences).forEach(([key, value]) => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = key;
+      input.value = typeof value === 'boolean' ? (value ? 'on' : '') : String(value);
+      form.appendChild(input);
+    });
+    
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
   }
 </script>
 
@@ -123,25 +157,24 @@
             >
               <!-- Avatar Section -->
               <div class="flex items-center gap-6">
-                <div class="relative">
-                  {#if user?.avatar_url}
-                    <img src={user.avatar_url} alt={user.username} class="w-20 h-20 rounded-full object-cover" />
-                  {:else}
-                    <div class="w-20 h-20 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-full flex items-center justify-center">
-                      <span class="text-white text-2xl font-bold">
-                        {user?.username?.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                  {/if}
-                  <button type="button" class="absolute -bottom-1 -right-1 btn-icon btn-sm variant-filled-surface">
-                    <Icon icon="lucide:camera" class="w-4 h-4" />
-                  </button>
-                </div>
+                <AvatarUpload
+                  currentAvatar={user?.avatar_url}
+                  username={user?.username || ''}
+                  size="lg"
+                  on:upload={handleAvatarUpload}
+                  on:remove={handleAvatarRemove}
+                />
                 <div>
                   <h3 class="font-semibold text-surface-900-50-token">{user?.username}</h3>
                   <p class="text-sm text-surface-500-400-token">
                     Member since {new Date(user?.created_at || '').toLocaleDateString()}
                   </p>
+                  {#if !user?.email_verified}
+                    <div class="flex items-center gap-1 mt-1">
+                      <Icon icon="lucide:alert-circle" class="w-4 h-4 text-warning-500" />
+                      <span class="text-sm text-warning-500">Email not verified</span>
+                    </div>
+                  {/if}
                 </div>
               </div>
 
@@ -458,130 +491,11 @@
               Privacy Settings
             </h2>
             
-            <form
-              method="POST"
-              action="?/updatePrivacy"
-              class="space-y-6"
-              use:enhance={() => {
-                loading = true;
-                return async ({ update }) => {
-                  loading = false;
-                  await update();
-                };
-              }}
-            >
-              <!-- Privacy Level -->
-              <div>
-                <label for="privacy_level" class="block text-sm font-medium text-surface-700-200-token mb-2">
-                  Profile Visibility
-                </label>
-                <select
-                  id="privacy_level"
-                  name="privacy_level"
-                  class="select w-full"
-                >
-                  <option value="public" selected={preferences?.privacy_level === 'public'}>
-                    Public - Anyone can view your profile
-                  </option>
-                  <option value="friends" selected={preferences?.privacy_level === 'friends'}>
-                    Friends Only - Only friends can view your profile
-                  </option>
-                  <option value="private" selected={preferences?.privacy_level === 'private'}>
-                    Private - Only you can view your profile
-                  </option>
-                </select>
-              </div>
-
-              <!-- Visibility Options -->
-              <div class="space-y-4">
-                <h3 class="text-lg font-semibold text-surface-900-50-token">
-                  What others can see
-                </h3>
-                
-                <div class="space-y-3">
-                  <label class="flex items-center justify-between">
-                    <div>
-                      <span class="text-sm font-medium text-surface-700-200-token">Playtime</span>
-                      <p class="text-xs text-surface-500-400-token">Show your game playtime hours</p>
-                    </div>
-                    <input
-                      type="checkbox"
-                      name="show_playtime"
-                      class="checkbox"
-                      checked={preferences?.show_playtime}
-                    />
-                  </label>
-
-                  <label class="flex items-center justify-between">
-                    <div>
-                      <span class="text-sm font-medium text-surface-700-200-token">Achievements</span>
-                      <p class="text-xs text-surface-500-400-token">Show your unlocked achievements</p>
-                    </div>
-                    <input
-                      type="checkbox"
-                      name="show_achievements"
-                      class="checkbox"
-                      checked={preferences?.show_achievements}
-                    />
-                  </label>
-
-                  <label class="flex items-center justify-between">
-                    <div>
-                      <span class="text-sm font-medium text-surface-700-200-token">Activity Feed</span>
-                      <p class="text-xs text-surface-500-400-token">Show your gaming activity</p>
-                    </div>
-                    <input
-                      type="checkbox"
-                      name="show_activity"
-                      class="checkbox"
-                      checked={preferences?.show_activity}
-                    />
-                  </label>
-
-                  <label class="flex items-center justify-between">
-                    <div>
-                      <span class="text-sm font-medium text-surface-700-200-token">Wishlist</span>
-                      <p class="text-xs text-surface-500-400-token">Show your game wishlist</p>
-                    </div>
-                    <input
-                      type="checkbox"
-                      name="show_wishlist"
-                      class="checkbox"
-                      checked={preferences?.show_wishlist}
-                    />
-                  </label>
-
-                  <label class="flex items-center justify-between">
-                    <div>
-                      <span class="text-sm font-medium text-surface-700-200-token">Reviews</span>
-                      <p class="text-xs text-surface-500-400-token">Show your game reviews</p>
-                    </div>
-                    <input
-                      type="checkbox"
-                      name="show_reviews"
-                      class="checkbox"
-                      checked={preferences?.show_reviews}
-                    />
-                  </label>
-                </div>
-              </div>
-
-              <div class="flex justify-end">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  class="btn variant-filled-primary"
-                >
-                  {#if loading}
-                    <Icon icon="lucide:loader-2" class="w-4 h-4 mr-2 animate-spin" />
-                    Saving...
-                  {:else}
-                    <Icon icon="lucide:save" class="w-4 h-4 mr-2" />
-                    Save Changes
-                  {/if}
-                </button>
-              </div>
-            </form>
+            <PrivacySettings 
+              preferences={privacySettings} 
+              {loading}
+              on:save={handlePrivacySave}
+            />
           </div>
         {/if}
 
