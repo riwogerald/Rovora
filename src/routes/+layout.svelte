@@ -6,6 +6,7 @@
   import { ModeWatcher } from 'mode-watcher';
   import { Toaster } from 'svelte-sonner';
   import Icon from '@iconify/svelte';
+  import EmailVerificationBanner from '$lib/components/ui/EmailVerificationBanner.svelte';
   
   export let data;
   
@@ -30,6 +31,9 @@
 <ModeWatcher />
 
 <div class="app h-full overflow-hidden flex flex-col" data-theme="rovora">
+  <!-- Email Verification Banner -->
+  <EmailVerificationBanner {user} showBanner={!isAuthPage} />
+  
   {#if !isAuthPage}
     <!-- Header -->
     <header class="border-b border-surface-200-700-token bg-surface-50-900-token">
@@ -87,6 +91,9 @@
                   <span class="hidden sm:block text-sm font-medium text-surface-900-50-token">
                     {user.display_name || user.username}
                   </span>
+                  {#if !user.email_verified}
+                    <Icon icon="lucide:alert-circle" class="w-4 h-4 text-warning-500" title="Email not verified" />
+                  {/if}
                 </button>
                 
                 <!-- Dropdown menu would go here -->
