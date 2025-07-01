@@ -1,5 +1,5 @@
 // Export all schema tables for easy importing
-export * from './users';
+export * from './auth';
 export * from './games';
 export * from './codex';
 export * from './social';
