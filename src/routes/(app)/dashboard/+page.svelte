@@ -1,10 +1,47 @@
 <script lang="ts">
   import { page } from '$app/stores';
+  import { goto } from '$app/navigation';
   import Icon from '@iconify/svelte';
+  import ActivityFeed from '$lib/components/social/ActivityFeed.svelte';
+  import type { ActivityWithDetails } from '$lib/database/queries/social';
   
   export let data;
   
   $: user = data.user;
+  $: activities = data.activities as ActivityWithDetails[];
+  $: stats = data.stats;
+  
+  let isLoadingMore = false;
+  
+  // Handle activity feed events
+  function handleViewGame(event: CustomEvent<{ gameId: string }>) {
+    goto(`/games/${event.detail.gameId}`);
+  }
+  
+  function handleViewCodexEntry(event: CustomEvent<{ entryId: string }>) {
+    goto(`/codex/${event.detail.entryId}`);
+  }
+  
+  function handleViewUser(event: CustomEvent<{ userId: string }>) {
+    goto(`/profile/${event.detail.userId}`);
+  }
+  
+  async function handleLoadMore() {
+    if (isLoadingMore) return;
+    
+    isLoadingMore = true;
+    try {
+      const response = await fetch(`/api/social/feed?offset=${activities.length}&limit=10`);
+      if (response.ok) {
+        const newActivities = await response.json();
+        activities = [...activities, ...newActivities];
+      }
+    } catch (error) {
+      console.error('Error loading more activities:', error);
+    } finally {
+      isLoadingMore = false;
+    }
+  }
 </script>
 
 <svelte:head>
@@ -87,16 +124,19 @@
 
     <!-- Recent Activity -->
     <div class="card variant-ghost-surface p-6">
-      <h2 class="text-xl font-semibold text-surface-900-50-token mb-4">
+      <h2 class="text-xl font-semibold text-surface-900-50-token mb-6">
         Recent Activity
       </h2>
       
-      <div class="text-center py-12">
-        <Icon icon="lucide:activity" class="w-12 h-12 text-surface-400-500-token mx-auto mb-4" />
-        <p class="text-surface-500-400-token">
-          No recent activity. Start by adding some games to your library!
-        </p>
-      </div>
+      <ActivityFeed 
+        {activities}
+        isLoading={isLoadingMore}
+        hasMore={activities.length >= 10}
+        on:loadMore={handleLoadMore}
+        on:viewGame={handleViewGame}
+        on:viewCodexEntry={handleViewCodexEntry}
+        on:viewUser={handleViewUser}
+      />
     </div>
   </div>
 </div>
