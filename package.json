@@ -18,11 +18,11 @@
     "prepare": "svelte-kit sync",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
-    "db:migrate": "node scripts/migrate.js",
+    "db:migrate": "bun scripts/migrate.js",
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx src/lib/database/seed.ts",
-    "db:reset": "rm -f local.db && npm run db:push && npm run db:seed",
-    "setup": "node scripts/setup-dev.js"
+    "db:reset": "rm -f local.db && bun run db:push && bun run db:seed",
+    "setup": "bun scripts/setup-dev.js"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^3.3.1",
