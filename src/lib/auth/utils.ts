@@ -1,6 +1,5 @@
 import { hash, verify } from 'argon2';
 import { createId } from '@paralleldrive/cuid2';
-import { TimeSpan, createDate } from 'lucia';
 
 export async function hashPassword(password: string): Promise<string> {
   return await hash(password, {
@@ -23,11 +22,15 @@ export function generatePasswordResetToken(): string {
 }
 
 export function createEmailVerificationExpiry(): Date {
-  return createDate(new TimeSpan(2, 'h')); // 2 hours
+  const expiry = new Date();
+  expiry.setHours(expiry.getHours() + 2); // 2 hours
+  return expiry;
 }
 
 export function createPasswordResetExpiry(): Date {
-  return createDate(new TimeSpan(1, 'h')); // 1 hour
+  const expiry = new Date();
+  expiry.setHours(expiry.getHours() + 1); // 1 hour
+  return expiry;
 }
 
 export function isValidEmail(email: string): boolean {
