@@ -3,6 +3,42 @@
 		"src/routes/+layout.server.ts",
 		"src/routes/+layout.server.ts"
 	],
+	"/api/codex": [
+		"src/routes/api/codex/+server.ts"
+	],
+	"/api/codex/[entryId]": [
+		"src/routes/api/codex/[entryId]/+server.ts"
+	],
+	"/api/games": [
+		"src/routes/api/games/+server.ts"
+	],
+	"/api/games/[slug]": [
+		"src/routes/api/games/[slug]/+server.ts"
+	],
+	"/api/library": [
+		"src/routes/api/library/+server.ts"
+	],
+	"/api/library/[entryId]": [
+		"src/routes/api/library/[entryId]/+server.ts"
+	],
+	"/api/search": [
+		"src/routes/api/search/+server.ts"
+	],
+	"/api/search/autocomplete": [
+		"src/routes/api/search/autocomplete/+server.ts"
+	],
+	"/api/social/comments": [
+		"src/routes/api/social/comments/+server.ts"
+	],
+	"/api/social/feed": [
+		"src/routes/api/social/feed/+server.ts"
+	],
+	"/api/social/follow": [
+		"src/routes/api/social/follow/+server.ts"
+	],
+	"/api/social/likes": [
+		"src/routes/api/social/likes/+server.ts"
+	],
 	"/(app)/dashboard": [
 		"src/routes/(app)/dashboard/+page.server.ts",
 		"src/routes/+layout.server.ts"
@@ -33,6 +69,9 @@
 	],
 	"/(auth)/reset-password": [
 		"src/routes/(auth)/reset-password/+page.server.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/(app)/search": [
 		"src/routes/+layout.server.ts"
 	],
 	"/(auth)/verify-email-notice": [
