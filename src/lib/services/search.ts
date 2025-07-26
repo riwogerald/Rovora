@@ -1,5 +1,5 @@
 import { db } from '$lib/database/connection';
-import { games, users, codexEntries, gameEntries } from '$lib/database/schema/auth';
+import { games, users, codexEntries, gameEntries } from '$lib/database/schema';
 import { sql, like, or, and, eq, desc, asc } from 'drizzle-orm';
 import type { Database } from '$lib/database/connection';
 
@@ -119,14 +119,10 @@ export class SearchService {
       );
     }
 
-    if (filters.gameGenres?.length) {
-      // Assuming genres are stored as JSON array or comma-separated
-      conditions.push(
-        or(...filters.gameGenres.map(genre => 
-          like(games.genres, `%${genre}%`)
-        ))
-      );
-    }
+    // Genre filtering would require a join with gameGenres table
+    // if (filters.gameGenres?.length) {
+    //   // Would need to join with game_genres and genres tables
+    // }
 
     if (filters.rating) {
       conditions.push(
@@ -148,8 +144,7 @@ export class SearchService {
         developer: games.developer,
         publisher: games.publisher,
         release_date: games.release_date,
-        metacritic_score: games.metacritic_score,
-        genres: games.genres
+        metacritic_score: games.metacritic_score
       })
       .from(games)
       .where(whereClause)
@@ -166,8 +161,7 @@ export class SearchService {
         developer: game.developer,
         publisher: game.publisher,
         releaseDate: game.release_date,
-        score: game.metacritic_score,
-        genres: game.genres
+        score: game.metacritic_score
       },
       relevanceScore: this.calculateRelevance(query, game.title, game.description || '')
     }));
