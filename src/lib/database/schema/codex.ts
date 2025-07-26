@@ -1,8 +1,8 @@
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 import { createId } from '@paralleldrive/cuid2';
 import { sql } from 'drizzle-orm';
-import { users } from './users';
-import { games, platforms } from './games';
+import { users } from './auth';
+import { games, platforms, tags } from './games';
 
 export const gameEntries = sqliteTable('game_entries', {
   id: text('id').primaryKey().$defaultFn(() => createId()),
