@@ -1,7 +1,7 @@
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 import { createId } from '@paralleldrive/cuid2';
 import { sql } from 'drizzle-orm';
-import { users } from './users';
+import { users } from './auth';
 import { games } from './games';
 import { codexEntries, gameEntries } from './codex';
 
