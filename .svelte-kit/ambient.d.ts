@@ -26,48 +26,50 @@
  * ```
  */
 declare module '$env/static/private' {
+	export const TURSO_DATABASE_URL: string;
+	export const TURSO_AUTH_TOKEN: string;
+	export const AUTH_SECRET: string;
+	export const GITHUB_ID: string;
+	export const GITHUB_SECRET: string;
+	export const GOOGLE_CLIENT_ID: string;
+	export const GOOGLE_CLIENT_SECRET: string;
+	export const SMTP_HOST: string;
+	export const SMTP_PORT: string;
+	export const SMTP_SECURE: string;
+	export const SMTP_USER: string;
+	export const SMTP_PASS: string;
+	export const FROM_EMAIL: string;
+	export const ENVIRONMENT: string;
+	export const RAWG_API_KEY: string;
+	export const IGDB_CLIENT_ID: string;
+	export const IGDB_CLIENT_SECRET: string;
+	export const STEAM_API_KEY: string;
 	export const ALLUSERSPROFILE: string;
 	export const APPDATA: string;
 	export const ChocolateyInstall: string;
 	export const ChocolateyLastPathUpdate: string;
-	export const COLOR: string;
 	export const CommonProgramFiles: string;
 	export const CommonProgramW6432: string;
 	export const COMPUTERNAME: string;
 	export const ComSpec: string;
 	export const CURL_CA_BUNDLE: string;
 	export const DriverData: string;
-	export const EDITOR: string;
 	export const FPS_BROWSER_APP_PROFILE_STRING: string;
 	export const FPS_BROWSER_USER_PROFILE_STRING: string;
 	export const GDAL_DATA: string;
-	export const HOME: string;
 	export const HOMEDRIVE: string;
 	export const HOMEPATH: string;
-	export const INIT_CWD: string;
 	export const LOCALAPPDATA: string;
 	export const LOGONSERVER: string;
 	export const NODE: string;
 	export const NODE_ENV: string;
 	export const npm_command: string;
-	export const npm_config_cache: string;
-	export const npm_config_globalconfig: string;
-	export const npm_config_global_prefix: string;
-	export const npm_config_init_module: string;
-	export const npm_config_legacy_peer_deps: string;
 	export const npm_config_local_prefix: string;
-	export const npm_config_node_gyp: string;
-	export const npm_config_noproxy: string;
-	export const npm_config_npm_version: string;
-	export const npm_config_prefix: string;
-	export const npm_config_userconfig: string;
 	export const npm_config_user_agent: string;
 	export const npm_execpath: string;
 	export const npm_lifecycle_event: string;
 	export const npm_lifecycle_script: string;
 	export const npm_node_execpath: string;
-	export const npm_package_engines_bun: string;
-	export const npm_package_engines_node: string;
 	export const npm_package_json: string;
 	export const npm_package_name: string;
 	export const npm_package_version: string;
@@ -87,9 +89,9 @@ declare module '$env/static/private' {
 	export const ProgramFiles: string;
 	export const ProgramW6432: string;
 	export const PROJ_LIB: string;
-	export const PROMPT: string;
 	export const PSModulePath: string;
 	export const PUBLIC: string;
+	export const PWD: string;
 	export const SESSIONNAME: string;
 	export const SSH_SOCKET_DIR: string;
 	export const SystemDrive: string;
@@ -118,7 +120,7 @@ declare module '$env/static/private' {
  * ```
  */
 declare module '$env/static/public' {
-	
+	export const PUBLIC_APP_URL: string;
 }
 
 /**
@@ -137,48 +139,50 @@ declare module '$env/static/public' {
  */
 declare module '$env/dynamic/private' {
 	export const env: {
+		TURSO_DATABASE_URL: string;
+		TURSO_AUTH_TOKEN: string;
+		AUTH_SECRET: string;
+		GITHUB_ID: string;
+		GITHUB_SECRET: string;
+		GOOGLE_CLIENT_ID: string;
+		GOOGLE_CLIENT_SECRET: string;
+		SMTP_HOST: string;
+		SMTP_PORT: string;
+		SMTP_SECURE: string;
+		SMTP_USER: string;
+		SMTP_PASS: string;
+		FROM_EMAIL: string;
+		ENVIRONMENT: string;
+		RAWG_API_KEY: string;
+		IGDB_CLIENT_ID: string;
+		IGDB_CLIENT_SECRET: string;
+		STEAM_API_KEY: string;
 		ALLUSERSPROFILE: string;
 		APPDATA: string;
 		ChocolateyInstall: string;
 		ChocolateyLastPathUpdate: string;
-		COLOR: string;
 		CommonProgramFiles: string;
 		CommonProgramW6432: string;
 		COMPUTERNAME: string;
 		ComSpec: string;
 		CURL_CA_BUNDLE: string;
 		DriverData: string;
-		EDITOR: string;
 		FPS_BROWSER_APP_PROFILE_STRING: string;
 		FPS_BROWSER_USER_PROFILE_STRING: string;
 		GDAL_DATA: string;
-		HOME: string;
 		HOMEDRIVE: string;
 		HOMEPATH: string;
-		INIT_CWD: string;
 		LOCALAPPDATA: string;
 		LOGONSERVER: string;
 		NODE: string;
 		NODE_ENV: string;
 		npm_command: string;
-		npm_config_cache: string;
-		npm_config_globalconfig: string;
-		npm_config_global_prefix: string;
-		npm_config_init_module: string;
-		npm_config_legacy_peer_deps: string;
 		npm_config_local_prefix: string;
-		npm_config_node_gyp: string;
-		npm_config_noproxy: string;
-		npm_config_npm_version: string;
-		npm_config_prefix: string;
-		npm_config_userconfig: string;
 		npm_config_user_agent: string;
 		npm_execpath: string;
 		npm_lifecycle_event: string;
 		npm_lifecycle_script: string;
 		npm_node_execpath: string;
-		npm_package_engines_bun: string;
-		npm_package_engines_node: string;
 		npm_package_json: string;
 		npm_package_name: string;
 		npm_package_version: string;
@@ -198,9 +202,9 @@ declare module '$env/dynamic/private' {
 		ProgramFiles: string;
 		ProgramW6432: string;
 		PROJ_LIB: string;
-		PROMPT: string;
 		PSModulePath: string;
 		PUBLIC: string;
+		PWD: string;
 		SESSIONNAME: string;
 		SSH_SOCKET_DIR: string;
 		SystemDrive: string;
@@ -236,6 +240,7 @@ declare module '$env/dynamic/private' {
  */
 declare module '$env/dynamic/public' {
 	export const env: {
+		PUBLIC_APP_URL: string;
 		[key: `PUBLIC_${string}`]: string | undefined;
 	}
 }
