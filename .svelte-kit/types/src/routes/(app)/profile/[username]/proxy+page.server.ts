@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm';
 import { db } from '$lib/database/connection';
 import { users, userStats, gameEntries, games, platforms } from '$lib/database/schema/auth';
 import { PrivacyQueries } from '$lib/database/queries/privacy';
+import { SocialQueries } from '$lib/database/queries/social';
 import { canViewProfile, canViewSection, filterUserData } from '$lib/utils/privacy';
 import type { PageServerLoad } from './$types';
 
@@ -76,10 +77,27 @@ export const load = async ({ params, locals, request }: Parameters<PageServerLoa
         .limit(5);
     }
 
+    // Initialize social queries
+    const socialQueries = new SocialQueries(db);
+    
     // Check if current user is following this user
     let isFollowing = false;
     if (!privacyContext.isOwnProfile && locals.user) {
-      isFollowing = await PrivacyQueries.areFriends(locals.user.id, user.id);
+      isFollowing = await socialQueries.isFollowing(locals.user.id, user.id);
+    }
+    
+    // Get recent activity (if activity is visible)
+    let recentActivity: any[] = [];
+    if (canViewSection(privacyContext, 'show_activity')) {
+      try {
+        recentActivity = await socialQueries.getUserActivityFeed(user.id, {
+          limit: 5,
+          offset: 0
+        });
+      } catch (error) {
+        console.error('Error fetching user activity:', error);
+        recentActivity = [];
+      }
     }
 
     // Filter user data based on privacy settings
@@ -89,6 +107,7 @@ export const load = async ({ params, locals, request }: Parameters<PageServerLoa
       user: filteredUser,
       stats,
       recentGames,
+      recentActivity,
       isOwnProfile: privacyContext.isOwnProfile,
       isFollowing,
       canViewLibrary: canViewSection(privacyContext, 'show_library'),
