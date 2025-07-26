@@ -13,7 +13,8 @@ export const nodes = [
 	() => import('./nodes/9'),
 	() => import('./nodes/10'),
 	() => import('./nodes/11'),
-	() => import('./nodes/12')
+	() => import('./nodes/12'),
+	() => import('./nodes/13')
 ];
 
 export const server_loads = [0];
@@ -21,15 +22,16 @@ export const server_loads = [0];
 export const dictionary = {
 		"/": [2],
 		"/(app)/dashboard": [~3],
-		"/(auth)/forgot-password": [~6],
-		"/(auth)/login": [~7],
-		"/(auth)/logout": [~8],
+		"/(auth)/forgot-password": [~7],
+		"/(auth)/login": [~8],
+		"/(auth)/logout": [~9],
 		"/(app)/profile": [~4],
 		"/(app)/profile/[username]": [~5],
-		"/(auth)/register": [~9],
-		"/(auth)/reset-password": [~10],
-		"/(auth)/verify-email-notice": [~12],
-		"/(auth)/verify-email": [~11]
+		"/(auth)/register": [~10],
+		"/(auth)/reset-password": [~11],
+		"/(app)/search": [6],
+		"/(auth)/verify-email-notice": [~13],
+		"/(auth)/verify-email": [~12]
 	};
 
 export const hooks = {
