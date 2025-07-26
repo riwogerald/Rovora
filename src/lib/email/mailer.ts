@@ -13,7 +13,7 @@ const emailConfig = {
 };
 
 // Create transporter
-const transporter = nodemailer.createTransporter(
+const transporter = nodemailer.createTransport(
   dev 
     ? {
         // Development: Use Ethereal Email for testing
