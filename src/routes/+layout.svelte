@@ -72,6 +72,9 @@
               <a href="/codex" class="text-surface-600-300-token hover:text-primary-500 transition-colors">
                 Codex
               </a>
+              <a href="/search" class="text-surface-600-300-token hover:text-primary-500 transition-colors">
+                Search
+              </a>
               <a href="/discover" class="text-surface-600-300-token hover:text-primary-500 transition-colors">
                 Discover
               </a>
@@ -84,9 +87,9 @@
           
           <div class="flex items-center gap-3">
             {#if user}
-              <button class="btn-icon variant-ghost-surface">
+              <a href="/search" class="btn-icon variant-ghost-surface">
                 <Icon icon="lucide:search" class="w-5 h-5" />
-              </button>
+              </a>
               <button class="btn-icon variant-ghost-surface">
                 <Icon icon="lucide:bell" class="w-5 h-5" />
               </button>
