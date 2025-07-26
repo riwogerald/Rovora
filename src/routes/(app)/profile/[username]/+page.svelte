@@ -1,20 +1,64 @@
 <script lang="ts">
   import { page } from '$app/stores';
+  import { goto } from '$app/navigation';
   import Icon from '@iconify/svelte';
   import ControllerRating from '$lib/components/ui/ControllerRating.svelte';
   import PrivacyIndicator from '$lib/components/ui/PrivacyIndicator.svelte';
+  import ActivityFeed from '$lib/components/social/ActivityFeed.svelte';
+  import type { ActivityWithDetails } from '$lib/database/queries/social';
   
   export let data;
   
   $: user = data.user;
   $: stats = data.stats;
   $: recentGames = data.recentGames;
+  $: recentActivity = data.recentActivity as ActivityWithDetails[];
   $: isOwnProfile = data.isOwnProfile;
   $: isFollowing = data.isFollowing;
   $: canViewLibrary = data.canViewLibrary;
   $: canViewActivity = data.canViewActivity;
   $: canViewCodex = data.canViewCodex;
   $: canSendFriendRequest = data.canSendFriendRequest;
+  
+  let isFollowLoading = false;
+  
+  // Handle follow/unfollow
+  async function handleToggleFollow() {
+    if (isFollowLoading || !canSendFriendRequest) return;
+    
+    isFollowLoading = true;
+    try {
+      const response = await fetch('/api/social/follow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          userId: user?.id,
+          action: isFollowing ? 'unfollow' : 'follow'
+        })
+      });
+      
+      if (response.ok) {
+        isFollowing = !isFollowing;
+      }
+    } catch (error) {
+      console.error('Error toggling follow:', error);
+    } finally {
+      isFollowLoading = false;
+    }
+  }
+  
+  // Handle activity feed events
+  function handleViewGame(event: CustomEvent<{ gameId: string }>) {
+    goto(`/games/${event.detail.gameId}`);
+  }
+  
+  function handleViewCodexEntry(event: CustomEvent<{ entryId: string }>) {
+    goto(`/codex/${event.detail.entryId}`);
+  }
+  
+  function handleViewUser(event: CustomEvent<{ userId: string }>) {
+    goto(`/profile/${event.detail.userId}`);
+  }
   
   function formatJoinDate(dateString: string): string {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -87,8 +131,17 @@
             <div class="flex items-center gap-3">
               {#if !isOwnProfile}
                 {#if canSendFriendRequest}
-                  <button class="btn variant-filled-primary">
-                    <Icon icon={isFollowing ? 'lucide:user-check' : 'lucide:user-plus'} class="w-4 h-4 mr-2" />
+                  <button 
+                    class="btn variant-filled-primary" 
+                    class:variant-filled-success={isFollowing}
+                    disabled={isFollowLoading}
+                    on:click={handleToggleFollow}
+                  >
+                    {#if isFollowLoading}
+                      <Icon icon="lucide:loader-2" class="w-4 h-4 mr-2 animate-spin" />
+                    {:else}
+                      <Icon icon={isFollowing ? 'lucide:user-check' : 'lucide:user-plus'} class="w-4 h-4 mr-2" />
+                    {/if}
                     {isFollowing ? 'Following' : 'Follow'}
                   </button>
                 {/if}
@@ -333,12 +386,14 @@
               Recent Activity
             </h2>
             
-            <div class="text-center py-8">
-              <Icon icon="lucide:activity" class="w-12 h-12 text-surface-400-500-token mx-auto mb-4" />
-              <p class="text-surface-500-400-token">
-                No recent activity to show
-              </p>
-            </div>
+            <ActivityFeed 
+              activities={recentActivity}
+              isLoading={false}
+              hasMore={false}
+              on:viewGame={handleViewGame}
+              on:viewCodexEntry={handleViewCodexEntry}
+              on:viewUser={handleViewUser}
+            />
           </div>
         {:else}
           <div class="card variant-ghost-surface p-6">
