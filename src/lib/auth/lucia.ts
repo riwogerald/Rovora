@@ -130,21 +130,3 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
   secret: AUTH_SECRET,
   trustHost: true
 });
-      location: string | null;
-      website: string | null;
-      steam_id: string | null;
-      xbox_gamertag: string | null;
-      psn_id: string | null;
-      nintendo_friend_code: string | null;
-      epic_username: string | null;
-      gog_username: string | null;
-      is_verified: boolean;
-      is_private: boolean;
-      is_banned: boolean;
-      email_verified: boolean;
-      created_at: string;
-      updated_at: string;
-      last_login: string | null;
-    };
-  }
-}
